@@ -19,11 +19,11 @@ library(p8105.datasets)
 ### data cleaning
 
 ```{r}
-brfss_df = 
-  p8105.datasets::brfss_smart2010 %>% 
+brfss_df =
+  p8105.datasets::brfss_smart2010 %>%
   janitor::clean_names() %>% # cleaning
   rename(location_abbr = locationabbr, location_desc = locationdesc) %>% # format the variable name
-  filter(topic == "Overall Health") %>% # focus on the “Overall Health” topic 
+  filter(topic == "Overall Health") %>% # focus on the “Overall Health” topic
   filter(response %in% c("Poor", "Fair", "Good", "Very good", "Excellent")) %>% # choose response
   arrange(response) # organize responses
 ```
@@ -35,10 +35,10 @@ brfss_df =
 * spaghetti plot
 
 ```{r}
-brfss_df %>% 
-  distinct(year, location_abbr, location_desc) %>% 
-  group_by(year, location_abbr) %>% 
-  summarise(n = n()) %>% 
+brfss_df %>%
+  distinct(year, location_abbr, location_desc) %>%
+  group_by(year, location_abbr) %>%
+  summarise(n = n()) %>%
   ggplot(aes(x = year, y = n, group = location_abbr, color = location_abbr)) +
   geom_line() +
   labs(
@@ -51,9 +51,9 @@ brfss_df %>%
 * a table of mean and standard deviation
 
 ```{r}
-table_exc = brfss_df %>% 
-  filter(year %in% c(2002, 2006, 2010) & location_abbr == "NY" & response == "Excellent") %>% 
-  group_by(year) %>% 
+table_exc = brfss_df %>%
+  filter(year %in% c(2002, 2006, 2010) & location_abbr == "NY" & response == "Excellent") %>%
+  group_by(year) %>%
   summarise(mean_exc = mean(data_value),
             sd_exc = sd(data_value))
 ```
@@ -69,9 +69,9 @@ table_exc = brfss_df %>%
 * a five-panel plot
 
 ```{r}
-brfss_df %>% 
-  group_by(year, location_abbr, response) %>% 
-  summarise(mean_prop = mean(data_value)) %>% 
+brfss_df %>%
+  group_by(year, location_abbr, response) %>%
+  summarise(mean_prop = mean(data_value)) %>%
   ggplot(aes(x = year, y = mean_prop, group = location_abbr, color = location_abbr)) +
   geom_line() +
   labs(y = "average proportion") +
@@ -81,3 +81,22 @@ brfss_df %>%
 
 ## Problem 2
 
+### short description
+
+```{r}
+insta_df = p8105.datasets::instacart %>% 
+  janitor::clean_names()
+```
+
+There are `r dim(insta_df)[2]` variables and `r dim(insta_df)[1]` observations in this dataset. It contains details of every order: like user id, order id, product id, product name, whether it's reordered or not, ...
+```{r} 
+insta_df %>% select(user_id, order_id, product_id, product_name, reordered) %>% head(10)
+```
+
+Also, in the local store, there are `r dim(distinct(insta_df, department))[1]` departments.
+
+### some questions
+
+* There are `r dim(distinct(insta_df, aisle))[1]` aisles in the store. `r (insta_df %>% group_by(aisle) %>% summarise(item_sum = n()) %>% arrange(desc(item_sum)))[1,1]` aisle is the most items ordered from.
+
+* 
