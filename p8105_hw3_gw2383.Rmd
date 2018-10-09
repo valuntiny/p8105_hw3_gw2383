@@ -24,15 +24,60 @@ brfss_df =
   janitor::clean_names() %>% # cleaning
   rename(location_abbr = locationabbr, location_desc = locationdesc) %>% # format the variable name
   filter(topic == "Overall Health") %>% # focus on the “Overall Health” topic 
-  filter(response %in% c("Poor", "Fair", "Good", "Very good", "Excellent")) # choose response
+  filter(response %in% c("Poor", "Fair", "Good", "Very good", "Excellent")) %>% # choose response
+  arrange(response) # organize responses
 ```
 
 ### some questions
 
-* In 2002, `r names(which(brfss_df %>% distinct(location_abbr, location_desc) %>% select(location_abbr) %>% table() == 7))` states were observed at 7 locations
+* In 2002, `r names(which(brfss_df %>% filter(year == 2002) %>% distinct(location_abbr, location_desc) %>% select(location_abbr) %>% table() == 7))` states were observed at 7 locations
 
 * spaghetti plot
 
 ```{r}
-
+brfss_df %>% 
+  distinct(year, location_abbr, location_desc) %>% 
+  group_by(year, location_abbr) %>% 
+  summarise(n = n()) %>% 
+  ggplot(aes(x = year, y = n, group = location_abbr, color = location_abbr)) +
+  geom_line() +
+  labs(
+    y = "number of observatons",
+    title = " number of observations in each state from 2002 to 2010"
+  ) +
+  theme_bw()
 ```
+
+* a table of mean and standard deviation
+
+```{r}
+table_exc = brfss_df %>% 
+  filter(year %in% c(2002, 2006, 2010) & location_abbr == "NY" & response == "Excellent") %>% 
+  group_by(year) %>% 
+  summarise(mean_exc = mean(data_value),
+            sd_exc = sd(data_value))
+```
+
+: Table. Mean and standard deviation of the proportion of “Excellent” responses across locations in NY State
+
+|year  |mean of “Excellent” responses|standard deviation of “Excellent” responses|
+|:----:|:---------------------------:|:-----------------------------------------:|
+|`r table_exc[1,1]`|`r table_exc[1,2]`|`r table_exc[1,3]`|
+|`r table_exc[2,1]`|`r table_exc[2,2]`|`r table_exc[2,3]`|
+|`r table_exc[3,1]`|`r table_exc[3,2]`|`r table_exc[3,3]`|
+
+* a five-panel plot
+
+```{r}
+brfss_df %>% 
+  group_by(year, location_abbr, response) %>% 
+  summarise(mean_prop = mean(data_value)) %>% 
+  ggplot(aes(x = year, y = mean_prop, group = location_abbr, color = location_abbr)) +
+  geom_line() +
+  labs(y = "average proportion") +
+  facet_grid(response ~ ., scales = "free") +
+  theme_bw()
+```
+
+## Problem 2
+
