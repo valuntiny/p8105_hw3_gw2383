@@ -12,6 +12,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(p8105.datasets)
+theme_set()
 ```
 
 ## Problem 1
@@ -89,6 +90,7 @@ insta_df = p8105.datasets::instacart %>%
 ```
 
 There are `r dim(insta_df)[2]` variables and `r dim(insta_df)[1]` observations in this dataset. It contains details of every order: like user id, order id, product id, product name, whether it's reordered or not, ...
+
 ```{r} 
 insta_df %>% select(user_id, order_id, product_id, product_name, reordered) %>% head(10)
 ```
@@ -99,4 +101,14 @@ Also, in the local store, there are `r dim(distinct(insta_df, department))[1]` d
 
 * There are `r dim(distinct(insta_df, aisle))[1]` aisles in the store. `r (insta_df %>% group_by(aisle) %>% summarise(item_sum = n()) %>% arrange(desc(item_sum)))[1,1]` aisle is the most items ordered from.
 
-* 
+* a plot that shows the number of items ordered in each aisle
+
+```{r}
+insta_df %>% 
+  group_by(aisle) %>% 
+  summarise(total_item = n()) %>% 
+  arrange(desc(total_item)) %>% 
+  ggplot()
+  
+```
+
