@@ -214,22 +214,102 @@ $(document).ready(function () {
 <h3>short description</h3>
 <pre class="r"><code>insta_df = p8105.datasets::instacart %&gt;% 
   janitor::clean_names()</code></pre>
-<p>There are 15 variables and 1384617 observations in this dataset. It contains details of every order: like user id, order id, product id, product name, whether it’s reordered or not, …</p>
-<pre class="r"><code>insta_df %&gt;% select(user_id, order_id, product_id, product_name, reordered) %&gt;% head(10)</code></pre>
-<pre><code>## # A tibble: 10 x 5
-##    user_id order_id product_id product_name                      reordered
-##      &lt;int&gt;    &lt;int&gt;      &lt;int&gt; &lt;chr&gt;                                 &lt;int&gt;
-##  1  112108        1      49302 Bulgarian Yogurt                          1
-##  2  112108        1      11109 Organic 4% Milk Fat Whole Milk C…         1
-##  3  112108        1      10246 Organic Celery Hearts                     0
-##  4  112108        1      49683 Cucumber Kirby                            0
-##  5  112108        1      43633 Lightly Smoked Sardines in Olive…         1
-##  6  112108        1      13176 Bag of Organic Bananas                    0
-##  7  112108        1      47209 Organic Hass Avocado                      0
-##  8  112108        1      22035 Organic Whole String Cheese               1
-##  9   79431       36      39612 Grated Pecorino Romano Cheese             0
-## 10   79431       36      19660 Spring Water                              1</code></pre>
-<p>Also, in the local store, there are 21 departments.</p>
+<p>There are 15 variables and 1384617 observations in this dataset. It contains details of every order: like <code>user id</code>:customer identifier, <code>order id</code>:order identifier, <code>product id</code>:product identifier, <code>product name</code>, <code>reordered</code>:whether it’s reordered or not, when it was ordered (assume 0 was assigned to Sunday). Also, in the local store, there are 21 departments.</p>
+<pre class="r"><code>insta_df %&gt;% select(user_id, order_id, product_id, product_name, reordered, order_dow) %&gt;% head(10) %&gt;% knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="right">user_id</th>
+<th align="right">order_id</th>
+<th align="right">product_id</th>
+<th align="left">product_name</th>
+<th align="right">reordered</th>
+<th align="right">order_dow</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">112108</td>
+<td align="right">1</td>
+<td align="right">49302</td>
+<td align="left">Bulgarian Yogurt</td>
+<td align="right">1</td>
+<td align="right">4</td>
+</tr>
+<tr class="even">
+<td align="right">112108</td>
+<td align="right">1</td>
+<td align="right">11109</td>
+<td align="left">Organic 4% Milk Fat Whole Milk Cottage Cheese</td>
+<td align="right">1</td>
+<td align="right">4</td>
+</tr>
+<tr class="odd">
+<td align="right">112108</td>
+<td align="right">1</td>
+<td align="right">10246</td>
+<td align="left">Organic Celery Hearts</td>
+<td align="right">0</td>
+<td align="right">4</td>
+</tr>
+<tr class="even">
+<td align="right">112108</td>
+<td align="right">1</td>
+<td align="right">49683</td>
+<td align="left">Cucumber Kirby</td>
+<td align="right">0</td>
+<td align="right">4</td>
+</tr>
+<tr class="odd">
+<td align="right">112108</td>
+<td align="right">1</td>
+<td align="right">43633</td>
+<td align="left">Lightly Smoked Sardines in Olive Oil</td>
+<td align="right">1</td>
+<td align="right">4</td>
+</tr>
+<tr class="even">
+<td align="right">112108</td>
+<td align="right">1</td>
+<td align="right">13176</td>
+<td align="left">Bag of Organic Bananas</td>
+<td align="right">0</td>
+<td align="right">4</td>
+</tr>
+<tr class="odd">
+<td align="right">112108</td>
+<td align="right">1</td>
+<td align="right">47209</td>
+<td align="left">Organic Hass Avocado</td>
+<td align="right">0</td>
+<td align="right">4</td>
+</tr>
+<tr class="even">
+<td align="right">112108</td>
+<td align="right">1</td>
+<td align="right">22035</td>
+<td align="left">Organic Whole String Cheese</td>
+<td align="right">1</td>
+<td align="right">4</td>
+</tr>
+<tr class="odd">
+<td align="right">79431</td>
+<td align="right">36</td>
+<td align="right">39612</td>
+<td align="left">Grated Pecorino Romano Cheese</td>
+<td align="right">0</td>
+<td align="right">6</td>
+</tr>
+<tr class="even">
+<td align="right">79431</td>
+<td align="right">36</td>
+<td align="right">19660</td>
+<td align="left">Spring Water</td>
+<td align="right">1</td>
+<td align="right">6</td>
+</tr>
+</tbody>
+</table>
 </div>
 <div id="some-questions-1" class="section level3">
 <h3>some questions</h3>
@@ -295,24 +375,27 @@ insta_df %&gt;%
 <ul>
 <li>a table showing the mean hour of the day</li>
 </ul>
+<p>for the consecutive number in order_dow, we assume 0 assign to Sunday, 1 assign to Monday and so on …</p>
 <pre class="r"><code>insta_df %&gt;% 
   filter(product_name %in% c(&quot;Pink Lady Apples&quot;, &quot;Coffee Ice Cream&quot;)) %&gt;% 
   select(product_name, order_dow, order_hour_of_day) %&gt;% 
+  # mutate(week_day = c(&quot;Sunday&quot;, &quot;Monday&quot;, &quot;Tuesday&quot;, &quot;Wednesday&quot;, &quot;Thursday&quot;, &quot;Friday&quot;, &quot;Saturday&quot;)[order_dow+1]) %&gt;% 
   group_by(product_name, order_dow) %&gt;% 
   summarise(mean_hour = mean(order_hour_of_day)) %&gt;% 
   spread(key = order_dow, value = mean_hour) %&gt;% 
+  rename(Sunday = &quot;0&quot;, Monday = &quot;1&quot;, Tuesday = &quot;2&quot;, Wednesday = &quot;3&quot;, Thursday = &quot;4&quot;, Friday = &quot;5&quot;, Saturday = &quot;6&quot;) %&gt;%
   knitr::kable(digit = 1)</code></pre>
 <table>
 <thead>
 <tr class="header">
 <th align="left">product_name</th>
-<th align="right">0</th>
-<th align="right">1</th>
-<th align="right">2</th>
-<th align="right">3</th>
-<th align="right">4</th>
-<th align="right">5</th>
-<th align="right">6</th>
+<th align="right">Sunday</th>
+<th align="right">Monday</th>
+<th align="right">Tuesday</th>
+<th align="right">Wednesday</th>
+<th align="right">Thursday</th>
+<th align="right">Friday</th>
+<th align="right">Saturday</th>
 </tr>
 </thead>
 <tbody>
@@ -339,6 +422,47 @@ insta_df %&gt;%
 </tbody>
 </table>
 </div>
+</div>
+<div id="problem-3" class="section level2">
+<h2>Problem 3</h2>
+<pre class="r"><code>noaa_df = p8105.datasets::ny_noaa %&gt;% 
+  janitor::clean_names()</code></pre>
+<p>There are 7 variables and 2595176 observations in this dataset. It contains details of everyday weatherr: like <code>id</code>:Weather station ID, <code>date</code>:Date of observation, <code>prcp</code>:Precipitation (tenths of mm), <code>snow</code>:Snowfall (mm), <code>snwd</code>:Snow depth (mm), <code>tmax</code>:Maximum temperature (tenths of degrees C), <code>tmin</code>:Minimum temperature (tenths of degrees C).</p>
+<p>Also we noticed that there are many NAs in the dataset, below are the table of NAs in each column</p>
+<pre class="r"><code>noaa_df %&gt;% 
+  summarise(id_na = sum(is.na(id)),
+            date_na = sum(is.na(date)),
+            prcp_na = sum(is.na(prcp)),
+            snow_na = sum(is.na(snow)),
+            snwd_na = sum(is.na(snwd)),
+            tmax_na = sum(is.na(tmax)),
+            tmin_na = sum(is.na(tmin))
+            ) %&gt;% 
+  knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="right">id_na</th>
+<th align="right">date_na</th>
+<th align="right">prcp_na</th>
+<th align="right">snow_na</th>
+<th align="right">snwd_na</th>
+<th align="right">tmax_na</th>
+<th align="right">tmin_na</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">145838</td>
+<td align="right">381221</td>
+<td align="right">591786</td>
+<td align="right">1134358</td>
+<td align="right">1134420</td>
+</tr>
+</tbody>
+</table>
 </div>
 
 

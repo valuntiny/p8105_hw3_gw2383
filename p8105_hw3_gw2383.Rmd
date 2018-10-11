@@ -69,26 +69,24 @@ brfss_df %>%
   ggplot(aes(x = year, y = mean_prop, group = location_abbr, color = location_abbr)) +
   geom_line() +
   labs(y = "average proportion") +
-  facet_grid(response ~ ., scales = "free") +
+  facet_grid(response ~ ., scales = "free") + # ploting vertically and without the same axis scaling
   theme_bw()
 ```
 
 ## Problem 2
-
-### short description
 
 ```{r}
 insta_df = p8105.datasets::instacart %>% 
   janitor::clean_names()
 ```
 
-There are `r dim(insta_df)[2]` variables and `r dim(insta_df)[1]` observations in this dataset. It contains details of every order: like user id, order id, product id, product name, whether it's reordered or not, ...
+### short description
+
+There are `r dim(insta_df)[2]` variables and `r dim(insta_df)[1]` observations in this dataset. It contains details of every order: like `user id`: customer identifier, `order id`: order identifier, `product id`: product identifier, `product name`, `reordered`: whether it's reordered or not, when it was ordered (assume 0 was assigned to Sunday). Also, in the local store, there are `r dim(distinct(insta_df, department))[1]` departments.
 
 ```{r} 
-insta_df %>% select(user_id, order_id, product_id, product_name, reordered) %>% head(10)
+insta_df %>% select(user_id, order_id, product_id, product_name, reordered, order_dow) %>% head(10) %>% knitr::kable()
 ```
-
-Also, in the local store, there are `r dim(distinct(insta_df, department))[1]` departments.
 
 ### some questions
 
@@ -97,6 +95,7 @@ Also, in the local store, there are `r dim(distinct(insta_df, department))[1]` d
 * a plot that shows the number of items ordered in each aisle
 
 ```{r, fig.height = 20}
+# a function for sorting the factors so that aisles will be listed in descending way
 reorder_size <- function(x) {
   factor(x, levels = names(sort(table(x))))
 }
@@ -120,12 +119,14 @@ insta_df %>%
   group_by(aisle, product_name) %>% 
   summarise(item_num = n()) %>% 
   group_by(aisle) %>% 
-  mutate(item_rank = min_rank(desc(item_num))) %>% 
+  mutate(item_rank = min_rank(desc(item_num))) %>% # calculate the rank
   filter(item_rank == 1) %>% 
   knitr::kable(digits = 1)
 ```
 
 * a table showing the mean hour of the day
+
+for the consecutive number in order_dow, we assume 0 assign to Sunday, 1 assign to Monday and so on ...
 
 ```{r}
 insta_df %>% 
@@ -134,6 +135,41 @@ insta_df %>%
   group_by(product_name, order_dow) %>% 
   summarise(mean_hour = mean(order_hour_of_day)) %>% 
   spread(key = order_dow, value = mean_hour) %>% 
+  rename(Sunday = "0", Monday = "1", Tuesday = "2", Wednesday = "3", Thursday = "4", Friday = "5", Saturday = "6") %>% # rename it to make it readable
   knitr::kable(digit = 1)
+```
+
+## Problem 3
+
+```{r}
+noaa_df = p8105.datasets::ny_noaa %>% 
+  janitor::clean_names()
+```
+
+### short description
+
+There are `r dim(noaa_df)[2]` variables and `r dim(noaa_df)[1]` observations in this dataset. It contains details of everyday weatherr: like `id`: Weather station ID, `date`: Date of observation, `prcp`: Precipitation (tenths of mm), `snow`: Snowfall (mm), `snwd`: Snow depth (mm), `tmax`: aximum temperature (tenths of degrees C), `tmin`: Minimum temperature (tenths of degrees C).
+
+Also we noticed that there are many NAs in the dataset, below are the table of the proportion of NAs in each column
+
+```{r}
+noaa_df %>% 
+  summarise(id_na = sum(is.na(id))/length(id),
+            date_na = sum(is.na(date))/length(date),
+            prcp_na = sum(is.na(prcp))/length(prcp),
+            snow_na = sum(is.na(snow))/length(snow),
+            snwd_na = sum(is.na(snwd))/length(snwd),
+            tmax_na = sum(is.na(tmax))/length(tmax),
+            tmin_na = sum(is.na(tmin))/length(tmin)
+            ) %>% 
+  knitr::kable(digits = 3)
+```
+
+### some questions
+
+* data cleaning and create separate variables for year, month, and day
+
+```{r}
+
 ```
 
