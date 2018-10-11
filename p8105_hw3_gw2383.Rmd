@@ -12,7 +12,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(p8105.datasets)
-theme_set()
+theme_set(theme_bw())
 ```
 
 ## Problem 1
@@ -103,12 +103,49 @@ Also, in the local store, there are `r dim(distinct(insta_df, department))[1]` d
 
 * a plot that shows the number of items ordered in each aisle
 
+```{r, fig.height = 20}
+reorder_size <- function(x) {
+  factor(x, levels = names(sort(table(x))))
+}
+
+insta_df %>% 
+  select(aisle) %>% 
+  ggplot(aes(x = reorder_size(aisle))) +
+  geom_bar() +
+  scale_y_log10() +
+  labs(x = "aisles", 
+       y = "log10(total number of items)", 
+       title = "number of items ordered in each aisle") +
+  coord_flip()
+```
+
+* the most popular item:
+
+```{r}
+popular_item = 
+  insta_df %>% 
+  filter(aisle %in% c("baking ingredients", "dog food care", "packaged vegetables fruits")) %>% 
+  group_by(aisle, product_name) %>% 
+  summarise(item_num = n()) %>% 
+  group_by(aisle) %>% 
+  mutate(item_rank = min_rank(desc(item_num))) %>% 
+  filter(item_rank == 1)
+```
+
+: the most popular item in each of the aisles
+
+|     |baking ingredients|dog food care|packaged vegetables fruits|
+|:---:|:----------------:|:-----------:|:------------------------:|
+|item |`r popular_item$product_name[1]`|`r popular_item$product_name[2]`|`r popular_item$product_name[3]`|
+
+* a table showing the mean hour of the day
+
 ```{r}
 insta_df %>% 
-  group_by(aisle) %>% 
-  summarise(total_item = n()) %>% 
-  arrange(desc(total_item)) %>% 
-  ggplot()
-  
+  filter(product_name %in% c("Pink Lady Apples", "Coffee Ice Cream")) %>% 
+  select(product_name, order_dow, order_hour_of_day) %>% 
+  group_by(product_name, order_dow) %>% 
+  summarise(mean_hour = mean(order_hour_of_day)) %>% 
+  spread(key = order_dow, value = mean_hour)
 ```
 
