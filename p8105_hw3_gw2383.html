@@ -161,35 +161,35 @@ $(document).ready(function () {
 <ul>
 <li>a table of mean and standard deviation</li>
 </ul>
-<pre class="r"><code>table_exc = brfss_df %&gt;%
+<pre class="r"><code>brfss_df %&gt;%
   filter(year %in% c(2002, 2006, 2010) &amp; location_abbr == &quot;NY&quot; &amp; response == &quot;Excellent&quot;) %&gt;%
   group_by(year) %&gt;%
   summarise(mean_exc = mean(data_value),
-            sd_exc = sd(data_value))</code></pre>
+            sd_exc = sd(data_value)) %&gt;% 
+   knitr::kable(digits = 1)</code></pre>
 <table>
-<caption>Table. Mean and standard deviation of the proportion of “Excellent” responses across locations in NY State</caption>
 <thead>
 <tr class="header">
-<th align="center">year</th>
-<th align="center">mean of “Excellent” responses</th>
-<th align="center">standard deviation of “Excellent” responses</th>
+<th align="right">year</th>
+<th align="right">mean_exc</th>
+<th align="right">sd_exc</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="center">2002</td>
-<td align="center">24.04</td>
-<td align="center">4.486424</td>
+<td align="right">2002</td>
+<td align="right">24.0</td>
+<td align="right">4.5</td>
 </tr>
 <tr class="even">
-<td align="center">2006</td>
-<td align="center">22.5333333</td>
-<td align="center">4.0008332</td>
+<td align="right">2006</td>
+<td align="right">22.5</td>
+<td align="right">4.0</td>
 </tr>
 <tr class="odd">
-<td align="center">2010</td>
-<td align="center">22.7</td>
-<td align="center">3.5672118</td>
+<td align="right">2010</td>
+<td align="right">22.7</td>
+<td align="right">3.6</td>
 </tr>
 </tbody>
 </table>
@@ -254,36 +254,41 @@ insta_df %&gt;%
 <ul>
 <li>the most popular item:</li>
 </ul>
-<pre class="r"><code>popular_item = 
-  insta_df %&gt;% 
+<pre class="r"><code>insta_df %&gt;% 
   filter(aisle %in% c(&quot;baking ingredients&quot;, &quot;dog food care&quot;, &quot;packaged vegetables fruits&quot;)) %&gt;% 
   group_by(aisle, product_name) %&gt;% 
   summarise(item_num = n()) %&gt;% 
   group_by(aisle) %&gt;% 
   mutate(item_rank = min_rank(desc(item_num))) %&gt;% 
-  filter(item_rank == 1)</code></pre>
-<table style="width:92%;">
-<caption>the most popular item in each of the aisles</caption>
-<colgroup>
-<col width="8%"></col>
-<col width="26%"></col>
-<col width="19%"></col>
-<col width="37%"></col>
-</colgroup>
+  filter(item_rank == 1) %&gt;% 
+  knitr::kable(digits = 1)</code></pre>
+<table>
 <thead>
 <tr class="header">
-<th align="center"></th>
-<th align="center">baking ingredients</th>
-<th align="center">dog food care</th>
-<th align="center">packaged vegetables fruits</th>
+<th align="left">aisle</th>
+<th align="left">product_name</th>
+<th align="right">item_num</th>
+<th align="right">item_rank</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="center">item</td>
-<td align="center">Light Brown Sugar</td>
-<td align="center">Snack Sticks Chicken &amp; Rice Recipe Dog Treats</td>
-<td align="center">Organic Baby Spinach</td>
+<td align="left">baking ingredients</td>
+<td align="left">Light Brown Sugar</td>
+<td align="right">499</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="left">dog food care</td>
+<td align="left">Snack Sticks Chicken &amp; Rice Recipe Dog Treats</td>
+<td align="right">30</td>
+<td align="right">1</td>
+</tr>
+<tr class="odd">
+<td align="left">packaged vegetables fruits</td>
+<td align="left">Organic Baby Spinach</td>
+<td align="right">9784</td>
+<td align="right">1</td>
 </tr>
 </tbody>
 </table>
@@ -295,13 +300,44 @@ insta_df %&gt;%
   select(product_name, order_dow, order_hour_of_day) %&gt;% 
   group_by(product_name, order_dow) %&gt;% 
   summarise(mean_hour = mean(order_hour_of_day)) %&gt;% 
-  spread(key = order_dow, value = mean_hour)</code></pre>
-<pre><code>## # A tibble: 2 x 8
-## # Groups:   product_name [2]
-##   product_name       `0`   `1`   `2`   `3`   `4`   `5`   `6`
-##   &lt;chr&gt;            &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-## 1 Coffee Ice Cream  13.8  14.3  15.4  15.3  15.2  12.3  13.8
-## 2 Pink Lady Apples  13.4  11.4  11.7  14.2  11.6  12.8  11.9</code></pre>
+  spread(key = order_dow, value = mean_hour) %&gt;% 
+  knitr::kable(digit = 1)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">product_name</th>
+<th align="right">0</th>
+<th align="right">1</th>
+<th align="right">2</th>
+<th align="right">3</th>
+<th align="right">4</th>
+<th align="right">5</th>
+<th align="right">6</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Coffee Ice Cream</td>
+<td align="right">13.8</td>
+<td align="right">14.3</td>
+<td align="right">15.4</td>
+<td align="right">15.3</td>
+<td align="right">15.2</td>
+<td align="right">12.3</td>
+<td align="right">13.8</td>
+</tr>
+<tr class="even">
+<td align="left">Pink Lady Apples</td>
+<td align="right">13.4</td>
+<td align="right">11.4</td>
+<td align="right">11.7</td>
+<td align="right">14.2</td>
+<td align="right">11.6</td>
+<td align="right">12.8</td>
+<td align="right">11.9</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 
