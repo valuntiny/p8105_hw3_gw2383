@@ -36,7 +36,7 @@ brfss_df =
 
 * spaghetti plot
 
-```{r}
+```{r, dpi=300}
 brfss_df %>%
   distinct(year, location_abbr, location_desc) %>%
   group_by(year, location_abbr) %>%
@@ -63,7 +63,7 @@ brfss_df %>%
 
 * a five-panel plot
 
-```{r}
+```{r, dpi=300}
 brfss_df %>%
   group_by(year, location_abbr, response) %>%
   summarise(mean_prop = mean(data_value)) %>%
@@ -95,7 +95,7 @@ insta_df %>% select(user_id, order_id, product_id, product_name, reordered, orde
 
 * a plot that shows the number of items ordered in each aisle
 
-```{r, fig.height = 20}
+```{r, fig.height = 20, dpi=300}
 # a function for sorting the factors so that aisles will be listed in descending way
 reorder_size <- function(x) {
   factor(x, levels = names(sort(table(x))))
@@ -191,7 +191,7 @@ The value is `r result_1[1]`, and it has been observed `r result_1[2]` times.
 
 * a two-panel plot showing the average max temperature in January and in July in each station across years
 
-```{r, fig.width = 100}
+```{r, fig.height = 20, dpi=300}
 noaa_df %>% 
   filter(month %in% c("01", "06")) %>% # choose
   group_by(id, year, month) %>% # group by
@@ -213,7 +213,7 @@ But we can also see some outliers: like in January 1982, (`r noaa_df %>% filter(
 
 * a two-panel plot showing tmax vs tmin for the full dataset
 
-```{r, fig.height = 8, fig.width = 12}
+```{r, fig.height = 8, fig.width = 12, dpi=300}
 # first make a plot of mean tmax
 tmax_plot = 
   noaa_df %>% 
@@ -237,7 +237,7 @@ tmax_plot / tmin_plot
 
 a plot showing the distribution of snowfall values greater than 0 and less than 100 separately by year
 
-```{r, fig.height = 8, fig.width = 12}
+```{r, fig.height = 8, fig.width = 12, dpi=300}
 noaa_df %>% 
   filter(snow_in_mm > 0 & snow_in_mm < 100) %>% 
   ggplot(aes(x = year, y = snow_in_mm)) +
