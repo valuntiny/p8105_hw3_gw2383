@@ -169,17 +169,43 @@ noaa_df %>%
 
 * data cleaning and create separate variables for year, month, and day
 
+```{r}
+noaa_df = noaa_df %>% 
+  separate(date, into = c("year", "month", "day"), sep = "-") %>% # separate the date
+  mutate(prcp = as.numeric(prcp)/10, tmax = as.numeric(tmax)/10, tmin = as.numeric(tmin)/10) %>% # change the unit
+  rename(prcp_in_mm = prcp, snow_in_mm = snow, snwd_in_mm = snwd, tmax_in_celsius = tmax, tmin_in_celsius = tmin)
+```
+
 Find the most commonly observed values for snowfall:
 
 ```{r}
-noaa_df %>% 
-  separate(date, into = c("year", "month", "day"), sep = "-") %>% # separate the date
-  rename(prcp_in_10_mm = prcp, snow_in_mm = snow, snwd_in_mm = snwd, tmax_in_celsius = tmax, tmin_in_celsius = tmin) %>% 
+result_1 = noaa_df %>% 
   group_by(snow_in_mm) %>% 
   summarise(observe_num = n()) %>% 
   arrange(desc(observe_num)) %>% # decreasing order
-  .[1,] %>% 
-  knitr::kable()
+  .[1,]
 ```
 
-* 
+The value is `r result_1[1]`, and it has been observed `r result_1[2]` times.
+
+* a two-panel plot
+
+```{r, fig.height = 30, out.width = "90%"}
+noaa_df %>% 
+  filter(month %in% c("01", "06")) %>% # choose
+  group_by(id, year, month) %>% # group by
+  summarise(mean_tmax = mean(tmax_in_celsius, na.rm = T)) %>% # calculate mean
+  filter(!is.na(mean_tmax)) %>% # remove NA
+  ggplot(aes(x = year, y = mean_tmax, group = id, color = id)) +
+  geom_line() +
+  facet_grid(month ~ ., scales = "free") +
+  theme(
+    legend.position = "bottom", 
+    axis.text.x = element_text(size = 5), 
+    legend.text = element_text(size = 5)
+    )
+```
+
+As we can see from the plot, it did follow some observable structure. The average temperature follows specific waving pattern: like in January 1994, the temperature in all stations reached their nadir, or in June 1999, the temperature in all stations reached their peak.
+
+But we can also see some outliers: like in January 1982, `r noaa_df %>% filter(year==1982, month=="01") %>% group_by(id) %>% summarise(mean_tmax = mean(tmax_in_celsius, na.rm = T)) %>% arrange(mean_tmax) %>% .[1,]` is an outlier, or in June 2004, `r noaa_df %>% filter(year==2004, month=="06") %>% group_by(id) %>% summarise(mean_tmax = mean(tmax_in_celsius, na.rm = T)) %>% arrange(mean_tmax) %>% .[1,]` is an outlier too.
