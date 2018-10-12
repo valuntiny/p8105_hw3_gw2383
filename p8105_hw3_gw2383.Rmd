@@ -2,16 +2,17 @@
 title: "p8105_hw3_gw2383"
 author: "Guojing Wu"
 date: "2018/10/7"
-output: html_document
-# output:
-#   github_document:
-#     toc: true
+# output: html_document
+output:
+  github_document:
+    toc: true
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(p8105.datasets)
+library(patchwork)
 theme_set(theme_bw())
 ```
 
@@ -90,7 +91,7 @@ insta_df %>% select(user_id, order_id, product_id, product_name, reordered, orde
 
 ### some questions
 
-* There are `r dim(distinct(insta_df, aisle))[1]` aisles in the store. `r (insta_df %>% group_by(aisle) %>% summarise(item_sum = n()) %>% arrange(desc(item_sum)))[1,1]` aisle is the most items ordered from.
+* There are `r dim(distinct(insta_df, aisle))[1]` aisles in the store. And among them, "`r (insta_df %>% group_by(aisle) %>% summarise(item_sum = n()) %>% arrange(desc(item_sum)))[1,1]`" aisle is the most items ordered from.
 
 * a plot that shows the number of items ordered in each aisle
 
@@ -108,7 +109,7 @@ insta_df %>%
   labs(x = "aisles", 
        y = "log10(total number of items)", 
        title = "number of items ordered in each aisle") +
-  coord_flip()
+  coord_flip() # flipping it so that reader can see it clearly
 ```
 
 * the most popular item:
@@ -188,9 +189,9 @@ result_1 = noaa_df %>%
 
 The value is `r result_1[1]`, and it has been observed `r result_1[2]` times.
 
-* a two-panel plot
+* a two-panel plot showing the average max temperature in January and in July in each station across years
 
-```{r, fig.height = 30, out.width = "90%"}
+```{r, fig.width = 100}
 noaa_df %>% 
   filter(month %in% c("01", "06")) %>% # choose
   group_by(id, year, month) %>% # group by
@@ -208,4 +209,39 @@ noaa_df %>%
 
 As we can see from the plot, it did follow some observable structure. The average temperature follows specific waving pattern: like in January 1994, the temperature in all stations reached their nadir, or in June 1999, the temperature in all stations reached their peak.
 
-But we can also see some outliers: like in January 1982, `r noaa_df %>% filter(year==1982, month=="01") %>% group_by(id) %>% summarise(mean_tmax = mean(tmax_in_celsius, na.rm = T)) %>% arrange(mean_tmax) %>% .[1,]` is an outlier, or in June 2004, `r noaa_df %>% filter(year==2004, month=="06") %>% group_by(id) %>% summarise(mean_tmax = mean(tmax_in_celsius, na.rm = T)) %>% arrange(mean_tmax) %>% .[1,]` is an outlier too.
+But we can also see some outliers: like in January 1982, (`r noaa_df %>% filter(year==1982, month=="01") %>% group_by(id) %>% summarise(mean_tmax = mean(tmax_in_celsius, na.rm = T)) %>% arrange(mean_tmax) %>% .[1,]`) is an outlier, or in June 2004, (`r noaa_df %>% filter(year==2004, month=="06") %>% group_by(id) %>% summarise(mean_tmax = mean(tmax_in_celsius, na.rm = T)) %>% arrange(mean_tmax) %>% .[1,]`) is an outlier too.
+
+* a two-panel plot showing tmax vs tmin for the full dataset
+
+```{r, fig.height = 8, fig.width = 12}
+# first make a plot of mean tmax
+tmax_plot = 
+  noaa_df %>% 
+  ggplot(aes(x = year, y = tmax_in_celsius)) +
+  geom_violin(aes(fill = year), color = "blue", alpha = 0.5) +
+  ylim(-60, 60) +
+  stat_summary(fun.y = median, geom = "point", color = "blue", size = 2) +
+  theme(legend.position = "none")
+
+# then make a plot of mean tmin
+tmin_plot = 
+  noaa_df %>% 
+  ggplot(aes(x = year, y = tmin_in_celsius)) +
+  geom_violin(aes(fill = year), color = "blue", alpha = 0.5) +
+  ylim(-60, 60) +
+  stat_summary(fun.y = median, geom = "point", color = "blue", size = 2) +
+  theme(legend.position = "none")
+
+tmax_plot / tmin_plot
+```
+
+a plot showing the distribution of snowfall values greater than 0 and less than 100 separately by year
+
+```{r, fig.height = 8, fig.width = 12}
+noaa_df %>% 
+  filter(snow_in_mm > 0 & snow_in_mm < 100) %>% 
+  ggplot(aes(x = year, y = snow_in_mm)) +
+  geom_violin(aes(fill = year), color = "blue", alpha = 0.5) +
+  stat_summary(fun.y = median, geom = "point", color = "blue", size = 2) +
+  theme(legend.position = "none")
+```
