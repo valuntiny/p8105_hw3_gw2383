@@ -169,7 +169,17 @@ noaa_df %>%
 
 * data cleaning and create separate variables for year, month, and day
 
-```{r}
+Find the most commonly observed values for snowfall:
 
+```{r}
+noaa_df %>% 
+  separate(date, into = c("year", "month", "day"), sep = "-") %>% # separate the date
+  rename(prcp_in_10_mm = prcp, snow_in_mm = snow, snwd_in_mm = snwd, tmax_in_celsius = tmax, tmin_in_celsius = tmin) %>% 
+  group_by(snow_in_mm) %>% 
+  summarise(observe_num = n()) %>% 
+  arrange(desc(observe_num)) %>% # decreasing order
+  .[1,] %>% 
+  knitr::kable()
 ```
 
+* 
